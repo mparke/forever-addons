@@ -1,0 +1,5 @@
+## Interface: 16001
+## Title: Pack Fixture
+## Version: @project-version@
+Libs\ForeverKit\ForeverKit.xml
+Main.lua

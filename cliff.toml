@@ -1,0 +1,37 @@
+# git-cliff: the player-facing changelog for one addon, from the squash titles of
+# commits that touched its folder or a library it embeds. tools/changelog passes the
+# addon's --tag-pattern and --include-path; this file sets the shape.
+[changelog]
+header = ""
+body = """
+{% if version %}\
+## {{ version | split(pat="/v") | last }} ({{ timestamp | date(format="%Y-%m-%d") }})
+{% else %}\
+## Unreleased
+{% endif %}\
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group | striptags | trim }}
+{% for commit in commits %}
+- {{ commit.message | upper_first }}\
+{% endfor %}
+{% endfor %}\
+{% if commits | length == 0 %}
+No player-facing changes.
+{% endif %}
+"""
+trim = true
+footer = ""
+
+[git]
+conventional_commits = true
+filter_unconventional = true
+split_commits = false
+protect_breaking_commits = false
+filter_commits = false
+sort_commits = "oldest"
+commit_parsers = [
+  { message = "^feat", group = "<!-- 0 -->New" },
+  { message = "^fix", group = "<!-- 1 -->Fixed" },
+  { message = "^perf", group = "<!-- 2 -->Faster" },
+  { message = ".*", skip = true },
+]

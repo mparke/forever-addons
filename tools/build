@@ -9,13 +9,14 @@ root=$(cd "$(dirname "$0")/.." && pwd)
 lua="$root/.tools/bin/lua"
 cd "$root"
 
+addons=${ADDONS_ROOT:-addons} # tests point this at spec/fixtures
 names=("$@")
 if [ ${#names[@]} -eq 0 ]; then
-  for dir in addons/*/; do names+=("$(basename "$dir")"); done
+  for dir in "$addons"/*/; do names+=("$(basename "$dir")"); done
 fi
 
 for name in "${names[@]}"; do
-  src="addons/$name"
+  src="$addons/$name"
   out=".build/$name"
   [ -d "$src" ] || { echo "build: no addon folder $src" >&2; exit 1; }
   mkdir -p "$out"

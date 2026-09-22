@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Print the changelog for one addon release: player-facing commits (feat, fix, perf)
+# since that addon's previous tag that touched its folder or a library its TOC embeds.
+# Usage: tools/changelog <Addon> <version>    (works before and after the tag exists)
+set -euo pipefail
+
+root=$(cd "$(dirname "$0")/.." && pwd)
+cd "$root"
+name=$1 version=$2
+src="${ADDONS_ROOT:-addons}/$name"
+tag="$name/v$version"
+
+paths=(--include-path "$src/**")
+shopt -s nullglob
+for toc in "$src"/*.toc; do
+  for lib in $(.tools/bin/lua tools/toc.lua --libs "$toc"); do
+    [ -d "libs/$lib" ] && paths+=(--include-path "libs/$lib/**")
+  done
+done
+shopt -u nullglob
+
+if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+  range=(--latest)
+else
+  range=(--unreleased --tag "$tag")
+fi
+.tools/bin/git-cliff --config cliff.toml --tag-pattern "^$name/v" "${paths[@]}" "${range[@]}" 2>/dev/null

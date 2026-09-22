@@ -29,3 +29,12 @@ WOW_API_SHA256=a001fa573a1097fe0c7e44a113f1c79a0193ce33797ea1bd608607652445dc9a
 # `make wow-api` and review the diff of tools/wow/forever_api.lua.
 WOW_RESOURCES_COMMIT=659e8042049df854c114714f8ecd640823a1cd5c
 WOW_RESOURCES_BUILD=1.60.1.69913
+
+# Changelog from conventional commits, path-filtered per addon (tools/release).
+GIT_CLIFF_VERSION=2.14.2
+GIT_CLIFF_SHA256=24f397c733add5390fdceee3a2088588ab0d5f944ce00d34cb7029b888cf2db4
+
+# BigWigsMods/packager release.sh at tag v2.6.1, pinned by commit (tools/package).
+PACKAGER_VERSION=v2.6.1
+PACKAGER_COMMIT=e50a250f8705041e40f2fa1ddcb280a686d65aa0
+PACKAGER_SHA256=59b15a8d851b09e6d0fdec702aec91331b9b49d84dbe778da6c621b48f268703
