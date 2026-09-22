@@ -1,0 +1,11 @@
+## Interface: 16001, 120100, 120105
+## Title: Hello Forever
+## Notes: A first addon for World of Warcraft: Forever. /hf for commands.
+## Author: Matthew Parke
+## Version: 0.1.0
+## SavedVariables: HelloForeverDB
+## SavedVariablesPerCharacter: HelloForeverCharDB
+## IconTexture: Interface\Icons\INV_Misc_QuestionMark
+## X-Category: Development Tools
+
+HelloForever.lua

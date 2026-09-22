@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Regenerate tools/wow/forever_api.lua from the BlizzardInterfaceResources commit
+# pinned in tools/versions. Commit the result: its diff is the API change between
+# beta builds, and luacheck and the test fakes read it.
+set -euo pipefail
+
+root=$(cd "$(dirname "$0")/.." && pwd)
+# shellcheck source=versions
+. "$root/tools/versions"
+dir="$root/.tools/cache/wow-resources-$WOW_RESOURCES_COMMIT"
+base="https://raw.githubusercontent.com/Ketho/BlizzardInterfaceResources/$WOW_RESOURCES_COMMIT/Resources"
+
+mkdir -p "$dir"
+for name in GlobalAPI FrameXML Frames LuaEnum Events WidgetAPI; do
+  [ -f "$dir/$name.lua" ] || curl -fsSL --retry 3 -o "$dir/$name.lua" "$base/$name.lua"
+done
+
+"$root/.tools/bin/lua" "$root/tools/wow/gen.lua" "$dir" "$WOW_RESOURCES_COMMIT" "$WOW_RESOURCES_BUILD" \
+  >"$root/tools/wow/forever_api.lua"
+echo "tools/wow/forever_api.lua regenerated for build $WOW_RESOURCES_BUILD"

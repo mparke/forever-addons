@@ -1,0 +1,9 @@
+-- luacov configuration. Coverage counts only code that ships and can be tested
+-- off the client: shared libraries and every Core/ folder. The floor is enforced
+-- per file by tools/coverage.lua (make coverage).
+return {
+  include = { "^libs/", "/Core/" },
+  exclude = { "^spec/", "^tools/", "%.tools/" },
+  statsfile = "luacov.stats.out",
+  reportfile = "luacov.report.out",
+}

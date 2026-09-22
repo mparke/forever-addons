@@ -1,0 +1,9 @@
+-- busted configuration: specs live in spec/, named *_spec.lua.
+return {
+  default = {
+    ROOT = { "spec" },
+    pattern = "_spec",
+    lpath = "spec/?.lua;spec/?/init.lua",
+    ["auto-insulate"] = true,
+  },
+}

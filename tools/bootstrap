@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+# Install the pinned toolchain from tools/versions into .tools/. Idempotent: a tool
+# whose stamp matches its pinned version is skipped, so re-running is cheap.
+# Needs only gcc, make, curl, tar and unzip, all present on ubuntu-latest and WSL;
+# no sudo. Lua 5.1 is built without readline because the dev headers need sudo.
+set -euo pipefail
+
+root=$(cd "$(dirname "$0")/.." && pwd)
+tools="$root/.tools"
+cache="$tools/cache"
+# shellcheck source=versions
+. "$root/tools/versions"
+mkdir -p "$tools/bin" "$cache"
+
+log() { printf '\033[1m==> %s\033[0m\n' "$*"; }
+
+# fetch URL FILE SHA256: download into the cache once and refuse a checksum mismatch.
+fetch() {
+  local url=$1 file="$cache/$2" want=$3 got
+  if [ ! -f "$file" ]; then
+    curl -fsSL --retry 3 -o "$file.part" "$url"
+    mv "$file.part" "$file"
+  fi
+  got=$(sha256sum "$file" | cut -d' ' -f1)
+  if [ "$got" != "$want" ]; then
+    echo "checksum mismatch for $2" >&2
+    echo "  pinned:     ${want:-<none>}" >&2
+    echo "  downloaded: $got" >&2
+    echo "Verify the download, then pin it in tools/versions." >&2
+    exit 1
+  fi
+}
+
+# stamped NAME VERSION: true when NAME is already installed at VERSION.
+stamped() { [ "$(cat "$tools/.stamp-$1" 2>/dev/null)" = "$2" ]; }
+stamp() { echo "$2" >"$tools/.stamp-$1"; }
+
+if ! stamped lua "$LUA_VERSION"; then
+  log "Lua $LUA_VERSION"
+  fetch "https://www.lua.org/ftp/lua-$LUA_VERSION.tar.gz" "lua-$LUA_VERSION.tar.gz" "$LUA_SHA256"
+  rm -rf "$cache/lua-$LUA_VERSION" "$tools/lua"
+  tar -xzf "$cache/lua-$LUA_VERSION.tar.gz" -C "$cache"
+  # The "linux" target without readline: POSIX plus dlopen, so C rocks can load.
+  # Lua 5.1 predates modern gcc and warns a lot; keep the log, show it only on failure.
+  if ! {
+    make -C "$cache/lua-$LUA_VERSION/src" all \
+      MYCFLAGS="-DLUA_USE_POSIX -DLUA_USE_DLOPEN" MYLIBS="-Wl,-E -ldl" &&
+      make -C "$cache/lua-$LUA_VERSION" install INSTALL_TOP="$tools/lua"
+  } >"$cache/lua-build.log" 2>&1; then
+    tail -40 "$cache/lua-build.log" >&2
+    exit 1
+  fi
+  rm -f "$tools/.stamp-luarocks" "$tools/.stamp-rocks"
+  stamp lua "$LUA_VERSION"
+fi
+ln -sf ../lua/bin/lua "$tools/bin/lua"
+ln -sf ../lua/bin/luac "$tools/bin/luac"
+
+if ! stamped luarocks "$LUAROCKS_VERSION"; then
+  log "LuaRocks $LUAROCKS_VERSION"
+  fetch "https://luarocks.github.io/luarocks/releases/luarocks-$LUAROCKS_VERSION.tar.gz" \
+    "luarocks-$LUAROCKS_VERSION.tar.gz" "$LUAROCKS_SHA256"
+  rm -rf "$cache/luarocks-$LUAROCKS_VERSION" "$tools/luarocks"
+  tar -xzf "$cache/luarocks-$LUAROCKS_VERSION.tar.gz" -C "$cache"
+  (
+    cd "$cache/luarocks-$LUAROCKS_VERSION"
+    ./configure --prefix="$tools/luarocks" --with-lua="$tools/lua" --lua-version=5.1 >/dev/null
+    make -s >/dev/null && make -s install >/dev/null
+  )
+  rm -f "$tools/.stamp-rocks"
+  stamp luarocks "$LUAROCKS_VERSION"
+fi
+
+rocks="busted=$BUSTED_VERSION luacov=$LUACOV_VERSION luacheck=$LUACHECK_VERSION"
+if ! stamped rocks "$rocks"; then
+  for spec in $rocks; do
+    log "rock ${spec%%=*} ${spec#*=}"
+    "$tools/luarocks/bin/luarocks" --tree="$tools/rocks" install "${spec%%=*}" "${spec#*=}" >/dev/null
+  done
+  stamp rocks "$rocks"
+fi
+for bin in busted luacheck luacov; do ln -sf "../rocks/bin/$bin" "$tools/bin/$bin"; done
+
+if ! stamped stylua "$STYLUA_VERSION"; then
+  log "StyLua $STYLUA_VERSION"
+  fetch "https://github.com/JohnnyMorganz/StyLua/releases/download/v$STYLUA_VERSION/stylua-linux-x86_64.zip" \
+    "stylua-$STYLUA_VERSION.zip" "$STYLUA_SHA256"
+  rm -f "$tools/bin/stylua"
+  unzip -q -o "$cache/stylua-$STYLUA_VERSION.zip" -d "$tools/bin"
+  chmod +x "$tools/bin/stylua"
+  stamp stylua "$STYLUA_VERSION"
+fi
+
+if ! stamped luals "$LUALS_VERSION"; then
+  log "Lua language server $LUALS_VERSION"
+  fetch "https://github.com/LuaLS/lua-language-server/releases/download/$LUALS_VERSION/lua-language-server-$LUALS_VERSION-linux-x64.tar.gz" \
+    "luals-$LUALS_VERSION.tar.gz" "$LUALS_SHA256"
+  rm -rf "$tools/luals" && mkdir -p "$tools/luals"
+  tar -xzf "$cache/luals-$LUALS_VERSION.tar.gz" -C "$tools/luals"
+  stamp luals "$LUALS_VERSION"
+fi
+ln -sf ../luals/bin/lua-language-server "$tools/bin/lua-language-server"
+
+if ! stamped wow-api "$WOW_API_VERSION"; then
+  log "WoW API annotations $WOW_API_VERSION"
+  fetch "https://codeload.github.com/Ketho/vscode-wow-api/tar.gz/refs/tags/$WOW_API_VERSION" \
+    "vscode-wow-api-$WOW_API_VERSION.tar.gz" "$WOW_API_SHA256"
+  rm -rf "$tools/wow-api" && mkdir -p "$tools/wow-api"
+  tar -xzf "$cache/vscode-wow-api-$WOW_API_VERSION.tar.gz" -C "$tools/wow-api" --strip-components=1 \
+    "vscode-wow-api-$WOW_API_VERSION/Annotations/Core"
+  stamp wow-api "$WOW_API_VERSION"
+fi
+
+git -C "$root" config core.hooksPath .githooks 2>/dev/null || true
+log "toolchain ready in .tools/ (add .tools/bin to PATH, or use make)"

@@ -1,0 +1,35 @@
+name: Task
+description: Planned work, from a feature to a tooling change.
+labels: ["task"]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What is true when this is done, in a sentence or two.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What we already know. Link research and decision docs.
+  - type: textarea
+    id: approach
+    attributes:
+      label: Approach
+      description: Numbered steps, if the approach is known.
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Checkboxes a reviewer can verify.
+      value: |
+        - [ ]
+    validations:
+      required: true
+  - type: textarea
+    id: questions
+    attributes:
+      label: Open questions
+      description: Anything that needs an in-game probe, with the exact /etrace or /dump to run.

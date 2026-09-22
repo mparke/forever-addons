@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Lua language server check against Ketho's WoW API annotations (.luarc.json).
+# Exits non-zero on any Warning or Error. Needs `make bootstrap` first.
+set -euo pipefail
+root=$(cd "$(dirname "$0")/.." && pwd)
+out=$(mktemp)
+trap 'rm -f "$out"' EXIT
+if "$root/.tools/bin/lua-language-server" --check="$root" --checklevel=Warning \
+  --configpath="$root/.luarc.json" --logpath="$root/.tools/luals-log" --check_format=pretty >"$out" 2>&1; then
+  echo "typecheck: no problems"
+else
+  # The progress bar is carriage-return noise; keep the diagnostics.
+  tr '\r' '\n' <"$out" | grep -v -E '^\s*$|Initializing|>>>>' >&2
+  exit 1
+fi

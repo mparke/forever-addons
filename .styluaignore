@@ -1,0 +1,4 @@
+.tools/
+.build/
+.release/
+tools/wow/forever_api.lua

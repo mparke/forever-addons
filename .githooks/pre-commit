@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Fast gate on what is being committed: formatting and lint of the STAGED version of
+# each Lua file (not the working tree, which may differ). CI runs the full `make check`.
+# Bypass with `git commit --no-verify` only for a WIP commit you will fix before the PR.
+set -euo pipefail
+
+root=$(git rev-parse --show-toplevel)
+cd "$root"
+bin="$root/.tools/bin"
+if [ ! -x "$bin/stylua" ] || [ ! -x "$bin/luacheck" ]; then
+  echo "pre-commit: toolchain missing; run 'make bootstrap'" >&2
+  exit 1
+fi
+
+mapfile -t files < <(git diff --cached --name-only --diff-filter=ACMR -- '*.lua')
+[ ${#files[@]} -eq 0 ] && exit 0
+
+status=0
+for file in "${files[@]}"; do
+  # Generated and vendored files are excluded the same way the full checks exclude them.
+  case "$file" in tools/wow/forever_api.lua | tools/wow/annotations/*) continue ;; esac
+  if ! git show ":$file" | "$bin/stylua" --check --stdin-filepath "$file" - >/dev/null 2>&1; then
+    echo "pre-commit: $file is not formatted (run 'make fmt')" >&2
+    status=1
+  fi
+  if ! git show ":$file" | "$bin/luacheck" --quiet --formatter plain --filename "$file" - >&2; then
+    status=1
+  fi
+done
+exit $status

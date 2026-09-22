@@ -1,0 +1,31 @@
+# Pinned toolchain. tools/bootstrap installs exactly these into .tools/, locally
+# and in CI. To upgrade a tool, change its line here and re-run `make bootstrap`;
+# a new download also needs its new SHA256 (bootstrap prints it on mismatch).
+
+LUA_VERSION=5.1.5
+LUA_SHA256=2640fc56a795f29d28ef15e13c34a47e223960b0240e8cb0a82d9b0738695333
+
+LUAROCKS_VERSION=3.13.0
+LUAROCKS_SHA256=245bf6ec560c042cb8948e3d661189292587c5949104677f1eecddc54dbe7e37
+
+# Rocks, installed with luarocks into .tools/rocks.
+BUSTED_VERSION=2.3.0-1
+LUACOV_VERSION=0.17.0-1
+LUACHECK_VERSION=1.2.0-1
+
+STYLUA_VERSION=2.5.2
+STYLUA_SHA256=bcb0d855e91f102f28a370e850f8566b3b44b79e6274d806ea5246837c0fd5ab
+
+LUALS_VERSION=3.19.1
+LUALS_SHA256=e9235d2d72ef55bc41cf8c99cda2ed64777682024b4bb81f5dea425060c5cbb8
+
+# WoW API annotations for the language server: Ketho/vscode-wow-api Annotations/Core
+# (Mainline 12.0.1 types, the right family for Forever).
+WOW_API_VERSION=0.22.3
+WOW_API_SHA256=a001fa573a1097fe0c7e44a113f1c79a0193ce33797ea1bd608607652445dc9a
+
+# Forever's real global, event and widget lists: Ketho/BlizzardInterfaceResources,
+# forever branch. Bump the commit when a new beta build lands, then run
+# `make wow-api` and review the diff of tools/wow/forever_api.lua.
+WOW_RESOURCES_COMMIT=659e8042049df854c114714f8ecd640823a1cd5c
+WOW_RESOURCES_BUILD=1.60.1.69913

@@ -1,0 +1,44 @@
+name: Bug report
+description: Something an addon does wrong.
+labels: ["bug"]
+body:
+  - type: input
+    id: addon
+    attributes:
+      label: Addon and version
+      description: As shown in the AddOns list, for example "Journal 1.2.0".
+    validations:
+      required: true
+  - type: input
+    id: build
+    attributes:
+      label: Client build
+      description: Type /dump GetBuildInfo() in game and paste the result.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      value: |
+        1.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+    validations:
+      required: true
+  - type: textarea
+    id: errors
+    attributes:
+      label: Lua errors
+      description: The full text from BugSack or the error frame, if any.
+      render: text
