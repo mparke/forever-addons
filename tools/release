@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# Tag a release of one addon. CI does the rest (.github/workflows/release.yml):
+# package, upload to CurseForge, create the GitHub Release.
+#
+# Usage: tools/release <Addon> <major|minor|patch|beta|X.Y.Z[-beta.N]> [--yes]
+#
+# Refuses, in this order: an addon without .pkgmeta (not published), uncommitted
+# changes, a branch other than main, a main that differs from origin/main, and a
+# failing `make check`. Then shows the changelog and asks before tagging
+# <Addon>/v<version> and pushing the tag. --yes skips the question.
+set -euo pipefail
+
+root=$(cd "$(dirname "$0")/.." && pwd)
+cd "$root"
+usage="usage: tools/release <Addon> <major|minor|patch|beta|X.Y.Z[-beta.N]> [--yes]"
+name=${1:?$usage}
+bump=${2:?$usage}
+yes=0
+[ "${3:-}" = "--yes" ] && yes=1
+refuse() {
+  echo "release: $*" >&2
+  exit 1
+}
+
+src="${ADDONS_ROOT:-addons}/$name"
+[ -d "$src" ] || refuse "no addon folder $src"
+[ -f "$src/.pkgmeta" ] || refuse "$name has no .pkgmeta, so it is not a published addon"
+[ -z "$(git status --porcelain)" ] || refuse "uncommitted changes; release from a clean main"
+branch=$(git symbolic-ref --short -q HEAD || echo "(detached)")
+[ "$branch" = "main" ] || refuse "on $branch; releases are tagged on main"
+git fetch -q origin main --tags
+[ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] ||
+  refuse "main is not the same as origin/main; pull or push first"
+make check >/dev/null 2>&1 || refuse "make check fails; run it to see why"
+
+mapfile -t existing < <(git tag -l "$name/v*" | sed "s|^$name/v||")
+version=$(.tools/bin/lua tools/version.lua next "$bump" "${existing[@]}") || exit 1
+tag="$name/v$version"
+
+echo "Releasing $name $version (tag $tag) from $(git rev-parse --short HEAD). Changelog:"
+echo
+tools/changelog "$name" "$version" | sed '/./,$!d; s/^/    /'
+echo
+if [ "$yes" -eq 0 ]; then
+  read -r -p "Tag and push $tag? [y/N] " answer
+  [ "$answer" = "y" ] || [ "$answer" = "Y" ] || refuse "cancelled"
+fi
+
+git tag -a "$tag" -m "$name $version"
+git push -q origin "$tag"
+echo "release: pushed $tag. The release workflow packages and uploads it:"
+echo "  $(git remote get-url origin | sed -E 's#^git@github.com:#https://github.com/#; s#\.git$##')/actions/workflows/release.yml"
