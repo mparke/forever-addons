@@ -8,6 +8,10 @@ set -euo pipefail
 root=$(cd "$(dirname "$0")/.." && pwd)
 cd "$root"
 name=$1 version=$2
+if [ "$(git rev-parse --is-shallow-repository)" = true ]; then
+  echo "changelog: this is a shallow clone; fetch full history (git fetch --unshallow --tags)" >&2
+  exit 1
+fi
 src="${ADDONS_ROOT:-addons}/$name"
 tag="$name/v$version"
 
@@ -36,5 +40,7 @@ start=$(git rev-list --max-parents=0 HEAD | tail -1)
 # Only the target tag may be seen: another tag on the same commit (a beta promoted to a
 # release without new commits) would otherwise head the section with the wrong version.
 pattern="^${tag//./\\.}\$"
-.tools/bin/git-cliff --config cliff.toml --tag-pattern "$pattern" "${paths[@]}" --tag "$tag" \
-  "$start..$target" 2>/dev/null | sed '/./,$!d'
+out=$(.tools/bin/git-cliff --config cliff.toml --tag-pattern "$pattern" "${paths[@]}" --tag "$tag" \
+  "$start..$target" 2>/dev/null | sed '/./,$!d')
+[ -n "$out" ] || { echo "changelog: git-cliff produced nothing for $tag ($start..$target)" >&2; exit 1; }
+printf '%s\n' "$out"
