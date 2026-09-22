@@ -34,8 +34,11 @@ local function define(target, names, opts)
 end
 
 -- Globals the client sets as variables rather than functions, which the generated
--- lists do not carry. Each is verified in game on the build named in forever_api.lua.
-local extraReadGlobals = { "WOW_PROJECT_ID", "WOW_PROJECT_MAINLINE" }
+-- lists do not carry. Each is verified on the build named in forever_api.lua, in game
+-- or in Blizzard's own forever-branch UI code:
+--   WOW_PROJECT_ID, WOW_PROJECT_MAINLINE, SlashCmdList: HelloForever in game, 69913
+--   _G: Blizzard_ChatFrameBase/Shared/SlashCommands.lua reads _G[...] (Gethe forever)
+local extraReadGlobals = { "WOW_PROJECT_ID", "WOW_PROJECT_MAINLINE", "_G" }
 local extraGlobals = { "SlashCmdList" } -- addons write their handlers into it
 
 local wowRead = {}

@@ -22,7 +22,7 @@ tools/release <Addon> <major|minor|patch|beta>   # from clean main; CI packages 
 
 ## Hard rules
 
-- Every global read must exist on Forever: `tools/wow/forever_api.lua` is generated from the pinned beta build and luacheck enforces it. Never add a name to the extras lists in `.luacheckrc` without an in-game `/dump` confirming it.
+- Every global read must exist on Forever: `tools/wow/forever_api.lua` is generated from the pinned beta build and luacheck enforces it. Never add a name to the extras lists in `.luacheckrc` without evidence it exists on Forever: an in-game `/dump`, or Blizzard's forever-branch UI code using it, cited in the comment.
 - An addon writes globals only for its SavedVariables and `SLASH_*` names, declared in its `.luacheckrc` block.
 - Published addons follow `docs/process/production.md`: versioned saved data with a spec per migration step, `issecretvalue` before computing on combat values, `InCombatLockdown` before protected work, the performance budget, every player-facing string through the locale table.
 - Never hand-edit `tools/wow/forever_api.lua`; bump the pin in `tools/versions` and run `make wow-api`.
