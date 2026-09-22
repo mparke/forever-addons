@@ -29,6 +29,29 @@ describe("tools/version.lua", function()
     end)
   end)
 
+  describe("previous", function()
+    local existing = { "1.2.3", "1.3.0-beta.1", "1.3.0-beta.2", "1.3.0", "1.3.1" }
+
+    it("gives a release the release before it, so stable players see every change since", function()
+      assert.are.equal("1.2.3", version.previous(existing, "1.3.0"))
+      assert.are.equal("1.3.0", version.previous(existing, "1.3.1"))
+    end)
+
+    it("gives a beta the tag just before it, beta or release", function()
+      assert.are.equal("1.3.0-beta.1", version.previous(existing, "1.3.0-beta.2"))
+      assert.are.equal("1.2.3", version.previous(existing, "1.3.0-beta.1"))
+    end)
+
+    it("works for a version not tagged yet", function()
+      assert.are.equal("1.3.1", version.previous(existing, "1.4.0"))
+    end)
+
+    it("is nil for the first release", function()
+      assert.is_nil(version.previous({}, "0.1.0"))
+      assert.is_nil(version.previous({ "0.1.0" }, "0.1.0"))
+    end)
+  end)
+
   describe("next", function()
     it("starts a first release from 0.0.0", function()
       assert.are.equal("0.1.0", version.next({}, "minor"))

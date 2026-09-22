@@ -3,6 +3,7 @@
 --
 -- As a module: local version = dofile("tools/version.lua")
 -- As a command: lua tools/version.lua next <bump> [existing versions...]
+--               lua tools/version.lua previous <version> [existing versions...]
 
 local M = {}
 
@@ -62,6 +63,23 @@ local function latest(versions, wantBeta)
   return best
 end
 
+-- The version a changelog for `target` starts after: for a release, the latest earlier
+-- release (stable players see everything since theirs); for a beta, the latest earlier
+-- version of either kind. Nil when there is none.
+function M.previous(existing, target)
+  local isBeta = M.parse(target).beta ~= nil
+  local best
+  for _, v in ipairs(existing) do
+    local parsed = M.parse(v)
+    if parsed and M.compare(v, target) < 0 and (isBeta or not parsed.beta) then
+      if not best or M.compare(v, best) > 0 then
+        best = v
+      end
+    end
+  end
+  return best
+end
+
 -- The next version given the versions already tagged and a bump: major, minor, patch
 -- (from the latest release), beta (continue the newest beta line past the latest
 -- release, or start X.Y+1.0-beta.1), or an exact version newer than all of them.
@@ -98,7 +116,13 @@ function M.next(existing, bump)
   return format(target)
 end
 
-if arg and arg[0] and arg[0]:match("tools/version%.lua$") and arg[1] == "next" then
+if arg and arg[0] and arg[0]:match("tools/version%.lua$") and arg[1] == "previous" then
+  local existing = {}
+  for i = 3, #arg do
+    existing[#existing + 1] = arg[i]
+  end
+  print(M.previous(existing, arg[2]) or "")
+elseif arg and arg[0] and arg[0]:match("tools/version%.lua$") and arg[1] == "next" then
   local existing = {}
   for i = 3, #arg do
     existing[#existing + 1] = arg[i]

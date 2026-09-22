@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Print the changelog for one addon release: player-facing commits (feat, fix, perf)
-# since that addon's previous tag that touched its folder or a library its TOC embeds.
+# since that addon's previous tag (tools/version.lua previous) that touched its
+# folder or a library its TOC embeds.
 # Usage: tools/changelog <Addon> <version>    (works before and after the tag exists)
 set -euo pipefail
 
@@ -19,9 +20,18 @@ for toc in "$src"/*.toc; do
 done
 shopt -u nullglob
 
-if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
-  range=(--latest)
-else
-  range=(--unreleased --tag "$tag")
-fi
-.tools/bin/git-cliff --config cliff.toml --tag-pattern "^$name/v" "${paths[@]}" "${range[@]}" 2>/dev/null
+# The range is explicit (previous tag .. target) so the result is the same wherever
+# HEAD is: before tagging (target HEAD, labelled with the new tag) or after (target the
+# tag itself, which CI builds from and a later HEAD may have moved past).
+mapfile -t existing < <(git tag -l "$name/v*" | sed "s|^$name/v||")
+previous=$(.tools/bin/lua tools/version.lua previous "$version" "${existing[@]}")
+target=HEAD
+git rev-parse -q --verify "refs/tags/$tag" >/dev/null && target=$tag
+# --tag labels the section even when the tagged commit itself touched none of the
+# included paths, which would otherwise leave the commits "Unreleased".
+# git-cliff needs an a..b range. A first release starts at the repository's root
+# commit, which holds only docs, so leaving the root itself out loses nothing.
+start=$(git rev-list --max-parents=0 HEAD | tail -1)
+[ -n "$previous" ] && start="$name/v$previous"
+.tools/bin/git-cliff --config cliff.toml --tag-pattern "^$name/v" "${paths[@]}" --tag "$tag" \
+  "$start..$target" 2>/dev/null | sed '/./,$!d'

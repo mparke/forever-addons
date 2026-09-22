@@ -39,7 +39,7 @@ tag="$name/v$version"
 
 echo "Releasing $name $version (tag $tag) from $(git rev-parse --short HEAD). Changelog:"
 echo
-tools/changelog "$name" "$version" | sed '/./,$!d; s/^/    /'
+tools/changelog "$name" "$version" | sed 's/^/    /'
 echo
 if [ "$yes" -eq 0 ]; then
   read -r -p "Tag and push $tag? [y/N] " answer

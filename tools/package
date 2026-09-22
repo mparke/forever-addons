@@ -40,7 +40,7 @@ rm -rf "$work"
 mkdir -p "$work/repo" "$work/out"
 cp -R ".build/$name/." "$work/repo/"
 cp "$src/.pkgmeta" "$work/repo/.pkgmeta"
-tools/changelog "$name" "$version" | sed '/./,$!d' >"$work/repo/CHANGELOG.md"
+tools/changelog "$name" "$version" >"$work/repo/CHANGELOG.md"
 
 (
   cd "$work/repo"
