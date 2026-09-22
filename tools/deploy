@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# Build each named addon (default: all) and copy it into the game's AddOns folder.
+#
+# The target folder comes from ADDONS_DIR, else deploy.local (gitignored), else the
+# Forever beta install. Safety rules, because the copy deletes stale files:
+#   - ADDONS_DIR must end in Interface/AddOns
+#   - a target that is a link (a junction shows up as one in WSL) is refused
+#   - a non-empty target this script did not create is refused; it may be an addon
+#     installed some other way. Delete or rename it yourself.
+# Options: -q prints only what changed (used by tools/watch).
+set -euo pipefail
+
+root=$(cd "$(dirname "$0")/.." && pwd)
+cd "$root"
+marker=".deployed-by-forever-addons"
+
+quiet=0
+if [ "${1:-}" = "-q" ]; then
+  quiet=1
+  shift
+fi
+
+if [ -z "${ADDONS_DIR:-}" ] && [ -f deploy.local ]; then
+  # shellcheck source=/dev/null
+  . ./deploy.local
+fi
+ADDONS_DIR=${ADDONS_DIR:-"/mnt/c/Program Files (x86)/World of Warcraft/_classic_beta_/Interface/AddOns"}
+ADDONS_DIR=${ADDONS_DIR%/}
+
+case "$ADDONS_DIR" in
+  */Interface/AddOns) ;;
+  *) echo "deploy: ADDONS_DIR must end in Interface/AddOns, got: $ADDONS_DIR" >&2; exit 1 ;;
+esac
+[ -d "$ADDONS_DIR" ] || { echo "deploy: no such folder: $ADDONS_DIR" >&2; exit 1; }
+
+names=("$@")
+if [ ${#names[@]} -eq 0 ]; then
+  for dir in addons/*/; do names+=("$(basename "$dir")"); done
+fi
+
+tools/build "${names[@]}"
+
+for name in "${names[@]}"; do
+  target="$ADDONS_DIR/$name"
+  if [ -L "$target" ]; then
+    echo "deploy: $target is a link (a junction?). Remove the link itself, not its contents:" >&2
+    echo "  rm \"$target\"   # no -r, no trailing slash: unlinks only" >&2
+    exit 1
+  fi
+  if [ -d "$target" ] && [ ! -f "$target/$marker" ] && [ -n "$(ls -A "$target")" ]; then
+    echo "deploy: $target exists and was not created by this repo; refusing to overwrite it" >&2
+    exit 1
+  fi
+  mkdir -p "$target"
+  touch "$target/$marker"
+  changes=$(rsync -rt --delete --exclude="/$marker" --itemize-changes ".build/$name/" "$target/" |
+    grep -E '^(>f|\*deleting|cd)' || true)
+  count=$(printf '%s' "$changes" | grep -c . || true)
+  if [ "$quiet" -eq 0 ]; then
+    echo "deployed $name ($count changed) -> $target"
+  elif [ "$count" -gt 0 ]; then
+    printf '%s  %s:\n' "$(date +%H:%M:%S)" "$name"
+    printf '%s\n' "$changes" | sed -E 's/^\*deleting +/  deleted /; s/^[^ ]+ +/  /'
+    if printf '%s' "$changes" | grep -q '\.toc$'; then
+      echo "  a .toc changed: restart the game client; /reload does not re-read TOC files"
+    fi
+  fi
+done
