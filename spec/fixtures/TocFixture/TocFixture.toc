@@ -1,0 +1,10 @@
+## Interface: 16001
+## Title: Toc Fixture
+## Version: @project-version@
+## SavedVariables: TocFixtureDB
+
+# a comment line, then a blank line
+
+Libs\Kit\Kit.xml
+Core.lua
+  UI\Frame.lua  

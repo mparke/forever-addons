@@ -1,0 +1,5 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+  <!-- <Script file="Commented.lua"/> must be ignored -->
+  <Script file="Kit.lua"/>
+  <Include file="Core\Core.xml"/>
+</Ui>
