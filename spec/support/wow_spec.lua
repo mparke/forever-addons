@@ -120,6 +120,20 @@ describe("support.wow", function()
       assert.is_true(wow.written.SomeGlobal)
     end)
 
+    it("runs securecallfunction's function, sending an error to the handler instead of raising", function()
+      assert.are.equal(
+        3,
+        wow.env.securecallfunction(function(a, b)
+          return a + b
+        end, 1, 2)
+      )
+      wow.env.securecallfunction(function()
+        error("inside")
+      end)
+      assert.are.equal(1, #wow.errors)
+      assert.matches("inside", wow.errors[1])
+    end)
+
     it("captures print output and errors sent to the error handler", function()
       wow.env.print("a", 1, nil)
       wow.env.geterrorhandler()("boom")

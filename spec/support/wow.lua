@@ -445,6 +445,15 @@ function Wow:_env()
   provide("seterrorhandler", function(handler)
     errorHandler = handler
   end)
+  -- Calls fn(...); an error goes to the error handler instead of propagating.
+  provide("securecallfunction", function(fn, ...)
+    local results = { pcall(fn, ...) }
+    if not results[1] then
+      errorHandler(results[2])
+      return
+    end
+    return unpack(results, 2, table.maxn(results))
+  end)
   provide("CreateFrame", function(widgetType, name, parent, templates)
     return wow:_widget(widgetType, name, parent or rawget(env, "UIParent"), templates)
   end)
