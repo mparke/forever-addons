@@ -1,7 +1,7 @@
 # Toolchain, build output and local config: never committed.
-/.tools/
-/.build/
-/.release/
+/.tools
+/.build
+/.release
 /deploy.local
 luacov.stats.out
 luacov.report.out
