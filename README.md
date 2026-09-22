@@ -15,6 +15,7 @@ Addons for **World of Warcraft: Forever** (Interface `16001`), with the tooling 
 | Addon | Status |
 |---|---|
 | [HelloForever](addons/HelloForever/) | Sandbox for learning and in-game experiments; not published |
+| [ForeverProbe](addons/ForeverProbe/) | Dev-only probe: which APIs exist, which events fire with what, what is secret; not published |
 
 | Library | What |
 |---|---|

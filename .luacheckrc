@@ -78,3 +78,4 @@ files["tools/**/*.lua"] = { std = "lua51" }
 files["addons/HelloForever/**/*.lua"] = {
   globals = { "HelloForeverDB", "HelloForeverCharDB", "SLASH_HELLOFOREVER1", "SLASH_HELLOFOREVER2" },
 }
+files["addons/ForeverProbe/**/*.lua"] = { globals = { "SLASH_FOREVERPROBE1" } }

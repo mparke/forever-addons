@@ -9,7 +9,8 @@ ns.Probe = Probe
 
 -- Walk a dotted path ("C_AddOns.GetAddOnMetadata") from root. Returns value, true when
 -- every part exists (a false value counts), else nil, false, and the path up to the
--- first missing part.
+-- first missing part. Reads with rawget: the question is what the client's tables
+-- really hold, and no metatable (the spec fake's strict ones included) should answer.
 function Probe.resolve(root, path)
   if not path:match("^[%a_][%w_]*$") and not path:match("^[%a_][%w_]*%.[%w_.]*[%w_]$") then
     error("not an API path: " .. path, 2)
@@ -20,7 +21,7 @@ function Probe.resolve(root, path)
     if type(value) ~= "table" then
       return nil, false, walked
     end
-    value = value[part]
+    value = rawget(value, part)
     if value == nil then
       return nil, false, walked
     end
