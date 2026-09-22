@@ -71,6 +71,14 @@ describe("ForeverProbe Core", function()
       log:add("c")
       assert.are.same({ "b", "c" }, log:entries())
     end)
+
+    it("stays correct long past its capacity", function()
+      local log = Probe.newLog(3)
+      for i = 1, 1000 do
+        log:add(i)
+      end
+      assert.are.same({ 998, 999, 1000 }, log:entries())
+    end)
   end)
 
   describe("parseCommand", function()
