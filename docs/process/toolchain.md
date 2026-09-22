@@ -19,6 +19,8 @@ make bootstrap
 | StyLua | formatting |
 | Lua language server | `make typecheck` and the editor |
 | Ketho WoW API annotations | types for the language server |
+| git-cliff | per-addon changelogs ([releasing.md](releasing.md)) |
+| BigWigs packager (`release.sh`, pinned by commit) | packaging and CurseForge upload |
 | BlizzardInterfaceResources (forever branch) | source of `tools/wow/forever_api.lua`, fetched by `make wow-api` |
 
 ## Make targets

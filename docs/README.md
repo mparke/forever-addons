@@ -14,6 +14,7 @@ How we work. [CLAUDE.md](../CLAUDE.md) is the short version.
 - [Production rules](process/production.md): saved data, combat safety, performance, localization, the in-game release checklist.
 - [Toolchain](process/toolchain.md): bootstrap, make targets, the hook, upgrading tools.
 - [Local loop](process/local-loop.md): build, deploy and watch into the game; safety rules.
+- [Releasing](process/releasing.md): versions, changelogs, packaging, CurseForge and GitHub Releases.
 
 ## Decisions
 
