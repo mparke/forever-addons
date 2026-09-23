@@ -1,0 +1,11 @@
+## Interface: 16001
+## Title: Forever Probe
+## Notes: Dev-only. Which APIs exist, which events fire with what, and which values are secret. /probe
+## Author: Matthew Parke
+## Version: 0.1.0
+## X-License: GPL-3.0
+## X-Category: Development Tools
+
+Libs\ForeverKit\ForeverKit.xml
+Core\Probe.lua
+ForeverProbe.lua

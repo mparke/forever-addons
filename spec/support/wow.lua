@@ -34,7 +34,7 @@ end
 
 -- Every top-level global name Forever defines, plus the variables .luacheckrc lists
 -- as extras (verified in game).
-local foreverGlobals = { WOW_PROJECT_ID = true, WOW_PROJECT_MAINLINE = true, SlashCmdList = true }
+local foreverGlobals = { WOW_PROJECT_ID = true, WOW_PROJECT_MAINLINE = true, SlashCmdList = true, _G = true }
 local foreverFields = {} -- "C_AddOns.GetAddOnMetadata" and friends
 for _, key in ipairs({ "lua", "api", "framexml", "framexml_lod", "frames", "frames_lod", "tables" }) do
   for _, name in ipairs(api[key]) do
@@ -487,6 +487,7 @@ function Wow:_env()
   provide("WOW_PROJECT_MAINLINE", 1)
   provide("WOW_PROJECT_ID", 1)
   provide("SlashCmdList", {})
+  provide("_G", env)
   provide(
     "C_AddOns",
     namespace("C_AddOns", {

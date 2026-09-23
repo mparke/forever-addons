@@ -25,7 +25,7 @@ Core receives what it needs from the WoW API as arguments. Glue reads the API an
 
 - An addon defines globals only for what the client requires to be global: SavedVariables and `SLASH_<NAME><n>`. Each addon lists these in its own `files[...]` block in `.luacheckrc`; anything else it writes to `_G` fails lint.
 - Reading a global fails lint unless Forever's client defines it. The lists come from the pinned beta build, so a Retail-only API fails even though the annotations know it. When Blizzard ships a new beta build, bump `WOW_RESOURCES_COMMIT` and `WOW_RESOURCES_BUILD` in `tools/versions`, run `make wow-api`, and read the diff of `tools/wow/forever_api.lua`: that diff is the API change.
-- A global the client sets as a variable rather than a function (`WOW_PROJECT_ID`, `SlashCmdList`) is not in the generated lists. Add it to `extraReadGlobals` or `extraGlobals` in `.luacheckrc` and to `tools/wow/annotations/extras.lua`, only after confirming it exists on Forever in game (`/dump NAME`).
+- A global the client sets as a variable rather than a function (`WOW_PROJECT_ID`, `SlashCmdList`) is not in the generated lists. Add it to `extraReadGlobals` or `extraGlobals` in `.luacheckrc` and to `tools/wow/annotations/extras.lua`, only after confirming it exists on Forever, in game (`/dump NAME`) or in Blizzard's forever-branch UI code, and cite the evidence in the comment there.
 
 ## Types
 
