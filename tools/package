@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# Package one addon release with the BigWigs packager, uploading only with --upload.
+# Usage: tools/package <Addon> <version> [--upload]
+#
+# The packager treats one git repo as one project and takes its version from the
+# repo's tags, so it runs on a throwaway repo holding exactly .build/<Addon> (the
+# addon plus its embedded libraries), the addon's .pkgmeta and a generated
+# CHANGELOG.md, tagged with the bare version. It then substitutes @project-version@,
+# strips --@debug@ blocks, zips, and with --upload sends the zip to CurseForge
+# (CF_API_KEY and the TOC's X-Curse-Project-ID). GitHub Releases are created by the
+# release workflow against the real <Addon>/v<version> tag, not by the packager.
+#
+# Output: .release/<Addon>/out/<Addon>-<version>.zip
+set -euo pipefail
+
+root=$(cd "$(dirname "$0")/.." && pwd)
+cd "$root"
+name=${1:?usage: tools/package <Addon> <version> [--upload]}
+version=${2:?usage: tools/package <Addon> <version> [--upload]}
+upload=0
+[ "${3:-}" = "--upload" ] && upload=1
+
+src="${ADDONS_ROOT:-addons}/$name"
+.tools/bin/lua tools/version.lua next "$version" >/dev/null ||
+  { echo "package: $version is not a valid X.Y.Z[-beta.N] version" >&2; exit 1; }
+[ -f "$src/.pkgmeta" ] ||
+  { echo "package: $src has no .pkgmeta, so it is not a published addon" >&2; exit 1; }
+
+if [ "$upload" -eq 1 ]; then
+  # Fail loudly rather than let the packager skip CurseForge and call it a release.
+  [ -n "${CF_API_KEY:-}" ] || { echo "package: --upload needs CF_API_KEY" >&2; exit 1; }
+  grep -q -E '^## X-Curse-Project-ID: *[0-9]+' "$src/$name.toc" ||
+    { echo "package: --upload needs '## X-Curse-Project-ID: <id>' in $src/$name.toc" >&2; exit 1; }
+fi
+
+tools/build "$name"
+
+work=".release/$name"
+rm -rf "$work"
+mkdir -p "$work/repo" "$work/out"
+cp -R ".build/$name/." "$work/repo/"
+cp "$src/.pkgmeta" "$work/repo/.pkgmeta"
+tools/changelog "$name" "$version" >"$work/repo/CHANGELOG.md"
+
+(
+  cd "$work/repo"
+  git init -q
+  git add -A
+  git -c user.name="forever-addons release" -c user.email="release@invalid" \
+    commit -q -m "$name $version"
+  git tag "$version"
+)
+
+args=(-t "$work/repo" -r "$root/$work/out")
+if [ "$upload" -eq 0 ]; then
+  args+=(-d)
+  unset CF_API_KEY
+fi
+# The packager must never create GitHub releases or touch other hosts from here.
+unset GITHUB_OAUTH WOWI_API_TOKEN WAGO_API_TOKEN
+.tools/bin/packager "${args[@]}"
+
+# The packager names the file <Addon>-<version>-forever.zip for the Forever flavour.
+shopt -s nullglob
+zips=("$work/out/$name-$version"*.zip)
+shopt -u nullglob
+[ ${#zips[@]} -eq 1 ] || { echo "package: expected one zip in $work/out" >&2; ls "$work/out" >&2; exit 1; }
+cp "$work/repo/CHANGELOG.md" "$work/out/CHANGELOG.md"
+echo "package: ${zips[0]}"

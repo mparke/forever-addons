@@ -38,9 +38,9 @@ Main is protected: no direct pushes, no force pushes, admins included. The only 
 
 - Types: `feat`, `fix`, `perf`, `refactor`, `test`, `docs`, `build`, `ci`, `chore`.
 - Scope: the addon folder name in lowercase (`helloforever`), `lib`, `tools`, `ci`, or `docs`.
-- `feat` and `fix` are what players see in a changelog. Everything else is grouped or hidden.
+- `feat` (New), `fix` (Fixed) and `perf` (Faster) are what players see in a changelog. Everything else is left out.
 
-The release changelog for an addon is built from the squash titles of commits that touched its folder or the shared library ([releasing.md](releasing.md), arriving with the release pipeline).
+The release changelog for an addon is built from the squash titles of commits that touched its folder or a library it embeds ([releasing.md](releasing.md)).
 
 ## Definition of done
 

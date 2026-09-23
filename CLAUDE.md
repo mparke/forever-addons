@@ -10,6 +10,7 @@ make test        # specs only
 make check       # what CI runs: fmt-check, lint, typecheck, coverage (90% per file)
 make fmt         # format all Lua
 make watch       # copy every save into the game's AddOns folder; then /reload in game
+tools/release <Addon> <major|minor|patch|beta>   # from clean main; CI packages and uploads
 ```
 
 ## Work loop

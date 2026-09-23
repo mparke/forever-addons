@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Print the changelog for one addon release: player-facing commits (feat, fix, perf)
+# since that addon's previous tag (tools/version.lua previous) that touched its
+# folder or a library its TOC embeds.
+# Usage: tools/changelog <Addon> <version>    (works before and after the tag exists)
+set -euo pipefail
+
+root=$(cd "$(dirname "$0")/.." && pwd)
+cd "$root"
+name=$1 version=$2
+if [ "$(git rev-parse --is-shallow-repository)" = true ]; then
+  echo "changelog: this is a shallow clone; fetch full history (git fetch --unshallow --tags)" >&2
+  exit 1
+fi
+src="${ADDONS_ROOT:-addons}/$name"
+tag="$name/v$version"
+
+paths=(--include-path "$src/**")
+shopt -s nullglob
+for toc in "$src"/*.toc; do
+  for lib in $(.tools/bin/lua tools/toc.lua --libs "$toc"); do
+    [ -d "libs/$lib" ] && paths+=(--include-path "libs/$lib/**")
+  done
+done
+shopt -u nullglob
+
+# The range is explicit (previous tag .. target) so the result is the same wherever
+# HEAD is: before tagging (target HEAD, labelled with the new tag) or after (target the
+# tag itself, which CI builds from and a later HEAD may have moved past).
+mapfile -t existing < <(git tag -l "$name/v*" | sed "s|^$name/v||")
+previous=$(.tools/bin/lua tools/version.lua previous "$version" "${existing[@]}")
+target=HEAD
+git rev-parse -q --verify "refs/tags/$tag" >/dev/null && target=$tag
+# --tag labels the section even when the tagged commit itself touched none of the
+# included paths, which would otherwise leave the commits "Unreleased".
+# git-cliff needs an a..b range. A first release starts at the repository's root
+# commit, which holds only docs, so leaving the root itself out loses nothing.
+start=$(git rev-list --max-parents=0 HEAD | tail -1)
+[ -n "$previous" ] && start="$name/v$previous"
+# Only the target tag may be seen: another tag on the same commit (a beta promoted to a
+# release without new commits) would otherwise head the section with the wrong version.
+pattern="^${tag//./\\.}\$"
+out=$(.tools/bin/git-cliff --config cliff.toml --tag-pattern "$pattern" "${paths[@]}" --tag "$tag" \
+  "$start..$target" 2>/dev/null | sed '/./,$!d')
+[ -n "$out" ] || { echo "changelog: git-cliff produced nothing for $tag ($start..$target)" >&2; exit 1; }
+printf '%s\n' "$out"
