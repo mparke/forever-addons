@@ -2,7 +2,7 @@
 title: Memento Deep Dive
 type: research
 created: 2026-09-22
-updated: 2026-09-22
+updated: 2026-09-23
 build: 1.60.1.69913
 subject: arcane-wizard-dev/Memento v2.28 (commit 809021b, 2026-09-18)
 status: current
@@ -60,7 +60,13 @@ Functions it calls, all present on Forever (Blizzard docs or Ketho's `GlobalAPI.
 
 ## Forever-only APIs Memento does not use
 
-Blizzard's Forever docs add `C_SwingTimer` (`PLAYER_SWING`, `PLAYER_SWING_RANGE_UPDATE`), `C_AutoLoot`, `C_LootFrame`, `C_GamepadTargeting`, and a `LegacyConsts` table: `LEGACY_REWARD_TRACK_FACTION_ID = 2802`, `LEGACY_POINTS_TRAIT_CURRENCY_ID = 4225`, `LEGACY_TREE_PROFESSIONS_ID = 1187`, `LEGACY_TREE_ADVENTURE_ID = 1188`, `LEGACY_TREE_PROGRESSION_ID = 1189`. There is no `C_Legacy` namespace; the Legacy system is achievements plus `C_Traits` trees plus a currency and a reputation track. For a journey addon, Legacy Challenge completions via `ACHIEVEMENT_EARNED` and Legacy points via `CURRENCY_DISPLAY_UPDATE` on currency 4225 are the Forever-specific milestones worth capturing. Whether those exact events fire for Legacy progress is unmeasured; probe with `/etrace` on the beta.
+Blizzard's Forever docs add `C_SwingTimer` (`PLAYER_SWING`, `PLAYER_SWING_RANGE_UPDATE`), `C_AutoLoot`, `C_LootFrame`, `C_GamepadTargeting`, and a `LegacyConsts` table: `LEGACY_REWARD_TRACK_FACTION_ID = 2802`, `LEGACY_POINTS_TRAIT_CURRENCY_ID = 4225`, `LEGACY_TREE_PROFESSIONS_ID = 1187`, `LEGACY_TREE_ADVENTURE_ID = 1188`, `LEGACY_TREE_PROGRESSION_ID = 1189`. There is no `C_Legacy` namespace; the Legacy system is achievements plus `C_Traits` trees plus a currency and a reputation track. For a journey addon, Legacy Challenge completions are the Forever-specific milestone worth capturing. Blizzard's own code settles how, on the `forever` branch at build 69977 [primary]:
+
+- **Challenges are achievements.** `Blizzard_LegacyChallenges.lua` registers `ACHIEVEMENT_EARNED` and reads its first argument as the challenge's id.
+- **Points per challenge** come from `C_Traits.GetTraitCurrencyForAchievement(4225, achievementID)`.
+- **The "Legacy points" the UI shows** are not a plain currency. They are the renown level of faction 2802: `C_MajorFactions.GetCurrentRenownLevel(Constants.LegacyConsts.LEGACY_REWARD_TRACK_FACTION_ID)`.
+
+Whether the events fire in play is still unmeasured. [DECISION-002](../decisions/DECISION-002-feature-set.md#open-questions-for-the-probe) lists the probe commands.
 
 ## What a Forever-aware fork would change
 

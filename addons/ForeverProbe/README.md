@@ -14,33 +14,6 @@ A dev-only addon for answering in-game questions quickly: does this API exist on
 
 Watches and the log last for the session; `/reload` clears them. Event names are case-insensitive.
 
-## Recipes for TASK-001 (#1)
+## What to run
 
-Run these on the current beta build and post the output, with the build number (`/dump GetBuildInfo()`), to #1.
-
-**Does completing a Legacy Challenge fire `ACHIEVEMENT_EARNED`?**
-
-```
-/probe watch ACHIEVEMENT_EARNED
-/probe watch CRITERIA_EARNED
-```
-
-Complete a Legacy Challenge, then `/probe log`. `ACHIEVEMENT_EARNED`'s first argument is the achievement id.
-
-**Does gaining Legacy points fire `CURRENCY_DISPLAY_UPDATE` for currency 4225?**
-
-```
-/probe watch CURRENCY_DISPLAY_UPDATE
-```
-
-Earn Legacy points. The first argument is the currency id; look for `4225`, and note the quantity and change arguments.
-
-**Does `SCREENSHOT_SUCCEEDED` fire for screenshots the player takes?**
-
-```
-/probe watch SCREENSHOT_STARTED
-/probe watch SCREENSHOT_SUCCEEDED
-/probe watch SCREENSHOT_FAILED
-```
-
-Press Print Screen, then `/run Screenshot()`, then `/probe log`. Compare the two.
+The open in-game questions, each with its exact commands, live in the decision that raised them. Today that is [DECISION-002's open questions](../../docs/decisions/DECISION-002-feature-set.md#open-questions-for-the-probe), for Travelogue. Post the output, with the build number (`/dump GetBuildInfo()`), where the decision says.
