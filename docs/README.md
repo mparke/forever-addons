@@ -19,6 +19,11 @@ How we work. [CLAUDE.md](../CLAUDE.md) is the short version.
 ## Decisions
 
 - [DECISION-001: Repo foundations](decisions/DECISION-001-repo-foundations.md): topology, quality gates, process, publishing.
+- [DECISION-002: Travelogue feature set](decisions/DECISION-002-feature-set.md): the first addon: MVP and later features, journal model, screenshots, saved data, the in-game questions still open.
+
+## Design
+
+- [Travelogue](design/Travelogue.md): how the first addon is built. A skeleton until the MVP work fills it in.
 
 ## Research
 
@@ -30,4 +35,5 @@ How we work. [CLAUDE.md](../CLAUDE.md) is the short version.
 
 - `research/`: findings with sources and evidence grades. Update in place; bump `updated:` and `build:`.
 - `decisions/`: numbered `DECISION-NNN-<slug>.md`, created when an issue settles something, linked from that issue.
+- `design/`: one `<Addon>.md` per published addon, saying how it is built. Updated in the PR that changes the design.
 - `process/`: the rules. A PR that changes how we work changes these in the same PR.
