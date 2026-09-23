@@ -65,19 +65,25 @@ local function dirname(path)
   return path:match("^(.*)/[^/]*$") or ""
 end
 
--- The ordered list of Lua files the client would run for this TOC, relative to root.
--- Raises one error naming every missing file. `exists` is injectable for tests.
-function M.loadOrder(root, tocName, exists)
+-- The ordered list of Lua files the client would run for this TOC, relative to root,
+-- and a second list with the filesystem path of each. Raises one error naming every
+-- missing file. `exists` is injectable for tests; `resolve` maps a file to where it
+-- actually lives (the spec loader uses it to find Libs/<Lib>/ in libs/ before a build).
+function M.loadOrder(root, tocName, exists, resolve)
   exists = exists or M.exists
-  local order, missing = {}, {}
+  resolve = resolve or function(file)
+    return root .. "/" .. file
+  end
+  local order, paths, missing = {}, {}, {}
 
   local function visit(file)
-    if not exists(root .. "/" .. file) then
+    local path = resolve(file)
+    if not exists(path) then
       missing[#missing + 1] = "missing: " .. file
       return
     end
     if file:match("%.xml$") then
-      local xml = read(root .. "/" .. file):gsub("<!%-%-.-%-%->", "")
+      local xml = read(path):gsub("<!%-%-.-%-%->", "")
       local dir = dirname(file)
       for tag, ref in xml:gmatch('<%s*(%a+)%s+[^>]-file%s*=%s*"([^"]+)"') do
         if tag == "Script" or tag == "Include" then
@@ -86,6 +92,7 @@ function M.loadOrder(root, tocName, exists)
       end
     else
       order[#order + 1] = file
+      paths[#paths + 1] = path
     end
   end
 
@@ -95,7 +102,7 @@ function M.loadOrder(root, tocName, exists)
   if #missing > 0 then
     error(tocName .. " lists files that do not exist:\n  " .. table.concat(missing, "\n  "), 0)
   end
-  return order
+  return order, paths
 end
 
 if arg and arg[0] and arg[0]:match("tools/toc%.lua$") then

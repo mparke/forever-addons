@@ -16583,7 +16583,7 @@ return {
       },
     },
     ["Region"] = {
-      inherits = { "Region" },
+      inherits = { "ScriptRegion" },
       methods = {
         "GetDrawLayer",
         "GetRotation",

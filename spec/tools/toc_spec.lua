@@ -47,6 +47,28 @@ describe("tools/toc.lua", function()
     end)
   end)
 
+  describe("loadOrder with a resolver", function()
+    it("reads and checks each file where the resolver says it lives, and returns those paths", function()
+      local function resolve(file)
+        return (file:gsub("^Libs/Kit/", "Libs/Kit/", 1))
+      end
+      local order, paths = toc.loadOrder(fixture, "TocFixture.toc", nil, function(file)
+        return fixture .. "/" .. resolve(file)
+      end)
+      assert.are.equal("Core.lua", order[4])
+      assert.are.equal(fixture .. "/Core.lua", paths[4])
+      assert.are.equal(fixture .. "/Libs/Kit/Core/A.lua", paths[2])
+    end)
+
+    it("reports a file missing at its resolved location", function()
+      local ok, err = pcall(toc.loadOrder, fixture, "TocFixture.toc", nil, function(file)
+        return file == "Core.lua" and "nowhere/Core.lua" or fixture .. "/" .. file
+      end)
+      assert.is_false(ok)
+      assert.matches("missing: Core.lua", err, 1, true)
+    end)
+  end)
+
   describe("libs", function()
     it("lists the Libs/<Name> folders a TOC references", function()
       assert.are.same({ "Kit" }, toc.libs(toc.parse("Libs\\Kit\\Kit.xml\nLibs/Kit/Other.lua\nCore.lua\n")))

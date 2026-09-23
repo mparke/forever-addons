@@ -16,6 +16,10 @@ Addons for **World of Warcraft: Forever** (Interface `16001`), with the tooling 
 |---|---|
 | [HelloForever](addons/HelloForever/) | Sandbox for learning and in-game experiments; not published |
 
+| Library | What |
+|---|---|
+| [ForeverKit](libs/ForeverKit/) | Saved-data migrations, locale tables, event dispatch; embedded privately into each addon |
+
 ## Getting started
 
 From WSL:

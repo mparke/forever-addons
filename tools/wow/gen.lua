@@ -48,6 +48,19 @@ local _, enumEnv = load("LuaEnum")
 local eventsBySystem = load("Events")
 local widgets = load("WidgetAPI")
 
+-- Upstream data errors, corrected here, each with its evidence. The forever_api spec
+-- fails if a widget inherits itself, so a new error surfaces on the next bump.
+local widgetFixes = {
+  -- WidgetAPI.lua lists Region as inheriting Region, which drops SetPoint, Show and
+  -- the rest of ScriptRegion from every FontString and Texture. Ketho's annotations
+  -- (Widget/Base/Region.lua) declare `Region : ScriptRegion`.
+  Region = { inherits = { "ScriptRegion" } },
+}
+for name, fix in pairs(widgetFixes) do
+  assert(widgets[name], "widget fix for unknown widget " .. name)
+  widgets[name].inherits = fix.inherits
+end
+
 local portable = {}
 for _, name in ipairs(luaApi) do
   if inPlainLua(name) then

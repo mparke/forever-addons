@@ -58,6 +58,40 @@ describe("tools/wow/forever_api.lua", function()
     assert.is_nil(portable.strsplit) -- a WoW extension, absent from plain Lua
   end)
 
+  it("has no widget type inheriting itself", function()
+    for name, widget in pairs(api.widgets) do
+      for _, parent in ipairs(widget.inherits) do
+        assert.are_not.equal(name, parent, name .. " inherits itself")
+        assert.is_table(api.widgets[parent], name .. " inherits unknown " .. parent)
+      end
+    end
+  end)
+
+  it("gives FontString the layout methods of ScriptRegion through Region", function()
+    local function has(name, method, seen)
+      seen = seen or {}
+      if seen[name] then
+        return false
+      end
+      seen[name] = true
+      local widget = api.widgets[name]
+      for _, m in ipairs(widget.methods) do
+        if m == method then
+          return true
+        end
+      end
+      for _, parent in ipairs(widget.inherits) do
+        if has(parent, method, seen) then
+          return true
+        end
+      end
+      return false
+    end
+    assert.is_true(has("FontString", "SetPoint"))
+    assert.is_true(has("FontString", "SetText"))
+    assert.is_true(has("StatusBar", "SetValue"))
+  end)
+
   it("describes widget inheritance down to Frame", function()
     local frame = api.widgets.Frame
     assert.is_table(frame)

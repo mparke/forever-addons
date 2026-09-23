@@ -1,0 +1,11 @@
+-- The manifest an addon's TOC references: every module must land in ns.Kit.
+describe("ForeverKit.xml", function()
+  it("loads every module into the addon's private namespace, and no global", function()
+    local wow = require("support.wow").new()
+    local ns = wow:loadAddon("KitUser", { root = "spec/fixtures" })
+    assert.is_table(ns.Kit.SavedData)
+    assert.is_table(ns.Kit.Locale)
+    assert.is_table(ns.Kit.Events)
+    assert.is_nil(next(wow.written))
+  end)
+end)

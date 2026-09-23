@@ -67,6 +67,8 @@ files["libs/*/Core/**/*.lua"] = { std = "wow_core" }
 
 -- Tests and tools run under plain Lua 5.1 on Linux, never in the client.
 files["spec/**/*.lua"] = { std = "lua51+busted" }
+-- Fixtures are addon code the specs load into the WoW fake.
+files["spec/fixtures/**/*.lua"] = { std = "wow", globals = { "NoLibDB" } }
 files["tools/**/*.lua"] = { std = "lua51" }
 
 -- Each addon declares the globals it owns: SavedVariables and slash command names.
