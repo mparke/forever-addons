@@ -9,7 +9,7 @@ export PATH := $(CURDIR)/.tools/bin:$(PATH)
 # Minimum line coverage, per file, for libs/ and every Core/ folder.
 COVERAGE_FLOOR ?= 90
 
-.PHONY: help bootstrap check fmt fmt-check lint typecheck test coverage wow-api
+.PHONY: help bootstrap check fmt fmt-check lint typecheck test coverage wow-api build deploy watch
 
 help: ## List targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{ printf "  make %-10s %s\n", $$1, $$2 }'
@@ -43,3 +43,12 @@ coverage: ## Run the specs with coverage and enforce COVERAGE_FLOOR per file
 
 wow-api: ## Regenerate tools/wow/forever_api.lua from the pinned Forever build
 	@tools/gen-wow-api
+
+build: ## Assemble .build/<Name> for every addon and verify its TOC
+	@tools/build
+
+deploy: ## Build and copy every addon into the game's AddOns folder
+	@tools/deploy
+
+watch: ## Deploy on every change until Ctrl-C
+	@tools/watch

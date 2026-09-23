@@ -30,6 +30,9 @@ make bootstrap
 | `make check` | everything CI runs: `fmt-check`, `lint`, `typecheck`, `coverage` |
 | `make fmt` | format all Lua in place |
 | `make test` | specs only, fastest loop |
+| `make watch` | copy every change into the game ([local-loop.md](local-loop.md)) |
+| `make deploy` | one build and copy |
+| `make build` | assemble `.build/<Name>` and verify each TOC, without copying |
 | `make wow-api` | regenerate the Forever API lists after bumping the pinned build |
 
 ## The pre-commit hook

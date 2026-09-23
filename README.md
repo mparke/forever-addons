@@ -23,6 +23,7 @@ From WSL:
 ```
 make bootstrap   # pinned toolchain into .tools/ (no sudo), git hooks on
 make check       # everything CI runs
+make watch       # copy every save into the Forever beta's AddOns folder
 ```
 
 Then read [CLAUDE.md](CLAUDE.md) for the work loop and [docs/](docs/README.md) for the rules and research.

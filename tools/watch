@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Re-deploy every second, printing only what changed, so an edit is in the game by
+# the time you type /reload. Polls instead of using inotify: the copy is cheap, and
+# it needs nothing installed. A failed build is reported once and retried; the loop
+# keeps running until Ctrl-C.
+set -uo pipefail
+
+root=$(cd "$(dirname "$0")/.." && pwd)
+cd "$root"
+echo "watching addons/ and libs/ (Ctrl-C to stop)"
+last_error=""
+while true; do
+  if output=$(tools/deploy -q "$@" 2>&1); then
+    [ -n "$last_error" ] && echo "$(date +%H:%M:%S)  build fixed"
+    last_error=""
+    [ -n "$output" ] && printf '%s\n' "$output"
+  elif [ "$output" != "$last_error" ]; then
+    printf '%s  build failed, not deployed:\n%s\n' "$(date +%H:%M:%S)" "$output"
+    last_error=$output
+  fi
+  sleep 1
+done

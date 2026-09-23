@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Assemble .build/<Name>/ for each named addon (default: all of addons/): the addon's
+# files minus dotfiles and Markdown, plus every Libs/<Lib>/ its TOC references that
+# exists in libs/. Then verify every file each TOC and XML names exists, with exact
+# case. .build/<Name> is exactly what deploys to the game and what gets packaged.
+set -euo pipefail
+
+root=$(cd "$(dirname "$0")/.." && pwd)
+lua="$root/.tools/bin/lua"
+cd "$root"
+
+names=("$@")
+if [ ${#names[@]} -eq 0 ]; then
+  for dir in addons/*/; do names+=("$(basename "$dir")"); done
+fi
+
+for name in "${names[@]}"; do
+  src="addons/$name"
+  out=".build/$name"
+  [ -d "$src" ] || { echo "build: no addon folder $src" >&2; exit 1; }
+  mkdir -p "$out"
+  rsync -a --delete --exclude='.*' --exclude='*.md' --exclude='/Libs/' "$src/" "$out/"
+
+  shopt -s nullglob
+  tocs=("$src"/*.toc)
+  shopt -u nullglob
+  [ ${#tocs[@]} -gt 0 ] || { echo "build: $src has no .toc" >&2; exit 1; }
+
+  # Embed shared libraries the TOCs reference; an addon-local Libs/ folder (vendored
+  # third-party code) is copied as is.
+  libs=$(for toc in "${tocs[@]}"; do "$lua" tools/toc.lua --libs "$toc"; done | sort -u)
+  rm -rf "$out/Libs"
+  if [ -d "$src/Libs" ]; then
+    rsync -a --exclude='.*' --exclude='*.md' "$src/Libs/" "$out/Libs/"
+  fi
+  for lib in $libs; do
+    if [ -d "libs/$lib" ]; then
+      mkdir -p "$out/Libs/$lib"
+      rsync -a --delete --exclude='.*' --exclude='*.md' "libs/$lib/" "$out/Libs/$lib/"
+    fi
+  done
+
+  for toc in "${tocs[@]}"; do
+    "$lua" tools/toc.lua "$out" "$(basename "$toc")" >/dev/null
+  done
+done
