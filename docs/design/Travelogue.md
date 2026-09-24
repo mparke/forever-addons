@@ -11,6 +11,8 @@ build: 1.60.1.69913
 
 How Travelogue is built. What it does, and why, is settled in [DECISION-002](../decisions/DECISION-002-feature-set.md). This doc is a skeleton: the MVP work fills in each section, in the same PR as the code it describes.
 
+The full design, drafted for review before any code, is published as a page: https://claude.ai/artifact/86Mi7PeYJzrsqHSvJbXqEu. It covers the modules, the screenshot capture flow, saved data, chat output, edge cases and build order, and it holds the review answers. Its content moves into this doc as the MVP lands; after that, this doc is the source.
+
 ## Layout
 
 Planned, following the [Lua rules](../process/lua.md): pure logic in `Core/`, thin glue outside it.
