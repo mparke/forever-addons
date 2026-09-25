@@ -16,6 +16,7 @@ Addons for **World of Warcraft: Forever** (Interface `16001`), with the tooling 
 |---|---|
 | [HelloForever](addons/HelloForever/) | Sandbox for learning and in-game experiments; not published |
 | [ForeverProbe](addons/ForeverProbe/) | Dev-only probe: which APIs exist, which events fire with what, what is secret; not published |
+| [Travelogue](addons/Travelogue/) | A journal of each character's journey with a screenshot per milestone (working name); in development, [#11](https://github.com/mparke/forever-addons/issues/11) |
 
 | Library | What |
 |---|---|

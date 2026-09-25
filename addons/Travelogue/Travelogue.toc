@@ -1,0 +1,12 @@
+## Interface: 16001
+## Title: Travelogue
+## Notes: A journal of your character's journey, with a screenshot at every milestone. /travelogue
+## Author: Matthew Parke
+## Version: @project-version@
+## SavedVariablesPerCharacter: TravelogueCharDB
+## X-License: GPL-3.0
+
+Libs\ForeverKit\ForeverKit.xml
+Locales\enUS.lua
+Core\Migrations.lua
+Core\Journal.lua
