@@ -27,8 +27,8 @@ WOW_API_SHA256=a001fa573a1097fe0c7e44a113f1c79a0193ce33797ea1bd608607652445dc9a
 # Forever's real global, event and widget lists: Ketho/BlizzardInterfaceResources,
 # forever branch. Bump the commit when a new beta build lands, then run
 # `make wow-api` and review the diff of tools/wow/forever_api.lua.
-WOW_RESOURCES_COMMIT=659e8042049df854c114714f8ecd640823a1cd5c
-WOW_RESOURCES_BUILD=1.60.1.69913
+WOW_RESOURCES_COMMIT=4149af6437af8631d045f3c6add51555fba3d784
+WOW_RESOURCES_BUILD=1.60.1.70009
 
 # Changelog from conventional commits, path-filtered per addon (tools/release).
 GIT_CLIFF_VERSION=2.14.2
