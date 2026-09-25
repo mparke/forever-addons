@@ -2,7 +2,7 @@
 id: DECISION-002
 title: Travelogue, the first addon - feature set, journal model, screenshots and saved data
 type: decision
-status: proposed
+status: accepted
 date: 2026-09-23
 build: 1.60.1.69913
 ---
@@ -23,7 +23,7 @@ Whatever only the game can answer is listed under [Open questions](#open-questio
 
 It fills the gap the [landscape survey](../research/journey-addon-landscape.md) found. No maintained addon combines a per-character milestone timeline with the screenshot taken at each milestone. On Forever the only living addon in either category is Memento, which takes screenshots but keeps no journal.
 
-"Travelogue" is a working name. No WoW addon by that name turned up on 2026-09-23. "Keepsake" was the first choice, but a 2016 screenshot addon already has it. Confirm the name before creating the CurseForge project.
+"Travelogue" is a working name. No WoW addon by that name turned up on 2026-09-23. "Keepsake" was the first choice, but a 2016 screenshot addon already has it. Confirm the name before creating the CurseForge project. The design review (2026-09-25) kept it as a temporary name; a new one will be brainstormed.
 
 ## Features
 
@@ -165,3 +165,21 @@ Run these with ForeverProbe ([README](../../addons/ForeverProbe/README.md)) on t
 - A settings panel needs `Settings` added to the lint extras, with evidence, before it can be written.
 - This decision's API names were checked on 69913 and still exist on 70009, the pin since #12. The payloads were read on the Gethe `forever` branch at 69977.
 - The design lives in [docs/design/Travelogue.md](../design/Travelogue.md). It starts as a skeleton and is filled in by the MVP work.
+
+## Design review, 2026-09-25
+
+The design was reviewed as a published page (linked from the [design doc](../design/Travelogue.md)) and approved with these answers. Where one differs from the tables above, the answer wins.
+
+| Question | Answer | Changes |
+|---|---|---|
+| Name | Keep Travelogue, as a temporary name | A new name is brainstormed before the CurseForge project exists. |
+| Slash command | `/travelogue`, and `/trav` as well | Adds the alias. |
+| Achievement pictures | UI shown, toast in the picture | Nothing. |
+| Achievements the account already has | Recorded, marked earned before, no picture | Nothing. |
+| First visits on a flight path | Recorded, no picture while on a taxi | The visit still gets its entry; the capture is skipped while `UnitOnTaxi("player")`. |
+| Death pictures | Off by default; the player turns them on | `settings.shots.death` defaults to `false`. |
+| Milestones that arrive together | One shared picture within 2 s; UI shown wins | Nothing. |
+| Lines `/travelogue` prints | 10 | Nothing. |
+| How the work lands | Four PRs, as the design's build order | Nothing. |
+
+Two names changed while the schema was written, both in [the design](../design/Travelogue.md#data-model): the first-visit kind is `visit`, not `zone` (every entry already has a `zone` field), and `archived` is a list of `{ guid, entries, seen }` rather than a table keyed by GUID, so archiving the same GUID twice cannot overwrite anything.

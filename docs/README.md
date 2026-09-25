@@ -23,7 +23,7 @@ How we work. [CLAUDE.md](../CLAUDE.md) is the short version.
 
 ## Design
 
-- [Travelogue](design/Travelogue.md): how the first addon is built. A skeleton until the MVP work fills it in. The full design for review is published as a page: https://claude.ai/artifact/86Mi7PeYJzrsqHSvJbXqEu
+- [Travelogue](design/Travelogue.md): how the first addon is built, filled in as each MVP PR lands, with the design review's answers. The full design for review is published as a page: https://claude.ai/artifact/86Mi7PeYJzrsqHSvJbXqEu
 
 ## Research
 
