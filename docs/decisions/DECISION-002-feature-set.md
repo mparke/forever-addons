@@ -11,8 +11,8 @@ build: 1.60.1.69913
 
 Settles TASK-001 ([#1](https://github.com/mparke/forever-addons/issues/1)). What exists on Forever was checked three ways:
 
-- **API presence** against `tools/wow/forever_api.lua`, generated from the pinned build 69913.
-- **Payloads and secrecy flags** from Blizzard's API documentation on the Gethe `forever` branch. That branch is at build 69977, published 2026-09-23, one build newer than the pin.
+- **API presence** against `tools/wow/forever_api.lua`, generated from the pinned build 69913 and re-checked on 70009 (#12): none of the names this decision uses was removed.
+- **Payloads and secrecy flags** from Blizzard's API documentation on the Gethe `forever` branch. That branch was at build 69977 when these were read, on 2026-09-23.
 - **Behaviour** from Blizzard's own UI code on that branch.
 
 Whatever only the game can answer is listed under [Open questions](#open-questions-for-the-probe) with the exact command to run.
@@ -163,5 +163,5 @@ Run these with ForeverProbe ([README](../../addons/ForeverProbe/README.md)) on t
 
 - Boss kills leave the MVP if Q4 comes back empty.
 - A settings panel needs `Settings` added to the lint extras, with evidence, before it can be written.
-- Build 69977 is on the Gethe `forever` branch. Bumping the pin (`make wow-api`) is its own issue. This decision's API names were checked on 69913, and the payloads were read on 69977.
+- This decision's API names were checked on 69913 and still exist on 70009, the pin since #12. The payloads were read on the Gethe `forever` branch at 69977.
 - The design lives in [docs/design/Travelogue.md](../design/Travelogue.md). It starts as a skeleton and is filled in by the MVP work.
